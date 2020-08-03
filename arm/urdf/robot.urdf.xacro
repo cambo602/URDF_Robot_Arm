@@ -1,0 +1,293 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="robot">
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+
+<xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+  </xacro:macro>
+
+<xacro:property name="width" value="0.1" />
+
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="red">
+    <color rgba="1 0 0 1"/>
+  </material>
+
+  <material name="blue">
+    <color rgba="0 0 1 1"/>
+  </material>
+
+  <material name="green">
+    <color rgba="0 1 0 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+
+
+  <link name="base">
+    <visual>
+      <geometry>
+        <box size="0.5 0.5 0.05"/>
+      </geometry> 
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.5 0.5 0.05"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="5"/>
+  </link>
+
+  <joint name="base_joint" type="continuous">
+    <axis xyz="0 0 1"/>
+    <parent link="base"/>
+    <child link="rot_base"/>
+    <origin xyz="0.0 0.0 0.025" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <transmission name="base_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$base_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="base_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="rot_base">
+    <visual>
+      <geometry>
+        <box size="0.25 0.25 0.1"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.075" rpy="0.0 0.0 0.0"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.25 0.25 0.1"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="4"/>
+  </link>
+
+  <joint name="shoulder_joint" type="revolute">
+  <limit lower="-1.1" upper="1.1" effort="30" velocity="1"/>
+    <axis xyz="0 1 0"/>
+    <parent link="rot_base"/>
+    <child link="humerus"/>
+    <origin xyz="0 0 0.1" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+      <transmission name="shoulder_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$shoulder_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="shoulder_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="humerus">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.5"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.15" rpy="0.0 0.0 0.0"/>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.5"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="3"/>
+  </link>
+
+  <joint name="elbow_joint" type="revolute">
+  <limit lower="-2" upper="2" effort="30" velocity="1"/>
+    <axis xyz="0 1 0"/>
+    <parent link="humerus"/>
+    <child link="forearm"/>
+    <origin xyz="0 0 0.4" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+   <transmission name="elbow_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$elbow_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="elbow_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="forearm">
+    <visual>
+      <geometry>
+        <box size="0.03 0.03 0.3"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.15" rpy="0.0 0.0 0.0"/>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.3"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="3"/>
+  </link>
+
+  <joint name="extend_joint" type="prismatic">
+  <limit lower="0" upper="0.2" effort="30" velocity="1"/>
+    <axis xyz="0 0 1"/>
+    <parent link="forearm"/>
+    <child link="wrist"/>
+    <origin xyz="0 0 0.4" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+      <transmission name="extend_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$extend_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="extend_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="wrist">
+    <visual>
+      <geometry>
+        <box size="0.025 0.025 0.3"/>
+      </geometry>
+      <origin xyz="0.0 0.0 -0.25" rpy="0.0 0.0 0.0"/>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.3"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="2"/>
+  </link>
+
+<link name="finger_turner">
+    <visual>
+      <geometry>
+        <box size="0.025 0.025 0.01"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.01"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="0.1"/>
+  </link>
+
+  <joint name="finger_turner_joint" type="continuous">
+    <axis xyz="0 0 1"/>
+    <parent link="wrist"/>
+    <child link="finger_turner"/>
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+   <transmission name="finger_turner_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$finger_turner_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="finger_turner_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <joint name="left_finger_joint" type="prismatic">
+  <limit lower="0" upper="0.01" effort="30" velocity="1"/>
+    <axis xyz="1 0 0"/>
+    <parent link="finger_turner"/>
+    <child link="left_finger"/>
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+
+    <transmission name="left_finger_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$left_finger_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="left_finger_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="left_finger">
+    <visual>
+      <geometry>
+        <box size="0.005 0.025 0.05"/>
+      </geometry>
+      <origin xyz="-0.0125 0.0 -0.075" rpy="0.0 0.0 0.0"/>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.005 0.025 0.05"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="0.5"/>
+  </link>
+
+  <joint name="right_finger_joint" type="prismatic">
+    <limit lower="-0.01" upper="0" effort="30" velocity="1"/>
+    <axis xyz="1 0 0"/>
+    <parent link="finger_turner"/>
+    <child link="right_finger"/>
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+<transmission name="right_finger_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="$right_finger_joint_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="right_finger_joint">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <link name="right_finger">
+    <visual>
+      <geometry>
+        <box size="0.005 0.025 0.05"/>
+      </geometry>
+      <origin xyz="0.0125 0.0 -0.075" rpy="0.0 0.0 0.0"/>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.005 0.025 0.05"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="0.5"/>
+  </link>
+
+</robot>

@@ -1,0 +1,38 @@
+<launch>
+  <arg name="model" default="$(find arm)/urdf/robot.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find arm)/rviz/urdf.rviz" />
+
+  <include file="$(find arm)/launch/gazebo.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+  <rosparam command="load"
+            file="$(find arm)/config/arm_joints.yaml"
+            ns="arm_joint_state_controller" />
+            
+            <rosparam command="load"
+            file="$(find arm)/config/base.yaml"
+            ns="arm_base_controller" />
+            
+            <rosparam command="load"
+            file="$(find arm)/config/elbow.yaml"
+            ns="arm_elbow_controller" />
+            
+            <rosparam command="load"
+            file="$(find arm)/config/extend.yaml"
+            ns="arm_extend_controller" />
+
+<rosparam command="load"
+            file="$(find arm)/config/finger.yaml"
+            ns="arm_finger_controller" />
+            
+            <rosparam command="load"
+            file="$(find arm)/config/shoulder.yaml"
+            ns="arm_shoulder_controller" />
+
+  <node name="arm_controller_spawner" pkg="controller_manager" type="spawner"
+    args="arm_joint_state_controller
+          --shutdown-timeout 3"/>
+</launch>
